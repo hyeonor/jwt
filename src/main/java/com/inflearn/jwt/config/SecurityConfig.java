@@ -1,6 +1,9 @@
 package com.inflearn.jwt.config;
 
+import com.inflearn.jwt.filter.MyThirdFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,8 +20,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // 스프링 시큐리티가 실행되기 이전에 실햄됨
+        http.addFilterBefore(new MyThirdFilter(), SecurityContextPersistenceFilter.class);
+        // csrf 토큰 비활성화 (테스트 시 걸어두는 게 좋음)
         http.csrf().disable();
-        // 세션을 사용하지 않겠다는 의미
+        // STATELESS: 세션을 사용하지 않겠다는 의미
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 // @CrossOrigin(인증 없을 때),시큐리티 필터에 등록 (인증 있을 때)
