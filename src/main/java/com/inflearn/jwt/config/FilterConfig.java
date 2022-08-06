@@ -13,7 +13,7 @@ public class FilterConfig {
     public FilterRegistrationBean<MyFirstFilter> firstFilter() {
         FilterRegistrationBean<MyFirstFilter> bean = new FilterRegistrationBean<>(new MyFirstFilter());
         bean.addUrlPatterns("/*");
-        bean.setOrder(0); // 낮은 번호가 필터 중에서 가장 먼저 실행됨.
+        bean.setOrder(1); // 낮은 번호가 필터 중에서 가장 먼저 실행됨.
         return bean;
     }
 
@@ -21,7 +21,7 @@ public class FilterConfig {
     public FilterRegistrationBean<MySecondFilter> secondFilter() {
         FilterRegistrationBean<MySecondFilter> bean = new FilterRegistrationBean<>(new MySecondFilter());
         bean.addUrlPatterns("/*");
-        bean.setOrder(1); // 낮은 번호가 필터 중에서 가장 먼저 실행됨.
+        bean.setOrder(0); // 낮은 번호가 필터 중에서 가장 먼저 실행됨.
         return bean;
     }
 }
