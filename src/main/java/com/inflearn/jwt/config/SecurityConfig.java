@@ -1,8 +1,8 @@
 package com.inflearn.jwt.config;
 
+import com.inflearn.jwt.config.jwt.JwtAuthenticationFilter;
 import com.inflearn.jwt.filter.MyThirdFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 // 기본적인 http 방식을 사용 X
                 .httpBasic().disable()
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .authorizeRequests()
                 .antMatchers("/api/v1/user/**")
                 .access("hasRole('ROLE_USER') or hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
