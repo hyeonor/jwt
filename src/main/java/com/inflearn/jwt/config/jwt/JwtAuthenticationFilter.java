@@ -1,5 +1,7 @@
 package com.inflearn.jwt.config.jwt;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inflearn.jwt.config.auth.PrincipalDetails;
 import com.inflearn.jwt.model.User;
@@ -15,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 // 스프인 시큐리티에서 UsernamePasswordAuthenticationFilter가 있음
 // login 요청해서 username, password 전송하면 (POST)
@@ -31,13 +34,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 
         try {
-//            BufferedReader br = request.getReader();
-//
-//            String input = null;
-//            while((input = br.readLine()) != null) {
-//            System.out.println(input);
-//            }
-
             // 1. username, password 받아서
             // json 데이터를 파싱해줌
             ObjectMapper objectMapper = new ObjectMapper();
@@ -77,6 +73,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         System.out.println("successfulAuthentication 실행됨: 인증 완료");
-        super.successfulAuthentication(request, response, chain, authResult);
+        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+
+        //RSA 방식은 아니고 Hash 암호방식
+        String jwtToken = JWT.create()
+                .withSubject("cos 토큰")
+                .withExpiresAt(new Date(System.currentTimeMillis() + (60000 * 10))) // 만료시간
+                .withClaim("id", principalDetails.getUser().getId())
+                .withClaim("username", principalDetails.getUser().getUsername())
+                .sign(Algorithm.HMAC512("cos"));
+
+        response.addHeader("Authorization", "Bearer " + jwtToken);
     }
 }
