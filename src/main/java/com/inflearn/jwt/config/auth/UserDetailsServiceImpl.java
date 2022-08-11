@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 // http://localhost:8080/login
 @Service
 @RequiredArgsConstructor
-public class PrincipalDetailsService implements UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -20,6 +20,6 @@ public class PrincipalDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("PrincipalDetailsService의 loadUserByUsername");
         User user = userRepository.findByUsername(username);
-        return new PrincipalDetails(user);
+        return new UserDetailsImpl(user);
     }
 }
