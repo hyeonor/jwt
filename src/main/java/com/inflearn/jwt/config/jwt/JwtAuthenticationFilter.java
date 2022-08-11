@@ -3,7 +3,7 @@ package com.inflearn.jwt.config.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.inflearn.jwt.config.auth.PrincipalDetails;
+import com.inflearn.jwt.config.auth.UserDetailsImpl;
 import com.inflearn.jwt.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,11 +47,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // 2. 정상인지 로그인 시도 해봄. authenticationManager로 로그인 시도를 하면
             // PrincipalDetailsService의 loadUserByUsername() 함수가 실행 후 정상이면 authentication이 리턴됨
             // DB에 있는 username과 password가 일치한다는 것
-           Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
             // 3. PrincipalDetails를 세션에 담고 (권한 관리 위해. 권한 1개뿐이라면 필요없음) => 로그인이 되었다는 뜻
-            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            System.out.println("로그인 완료됨 " + principalDetails.getUser().getUsername());
+            UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authentication.getPrincipal();
+            System.out.println("로그인 완료됨 " + userDetailsImpl.getUser().getUsername());
             System.out.println("================1================");
 
             // authentication 객체가 session 영역에 저장해야하고 그 방법이 return 해줌
@@ -73,16 +73,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         System.out.println("successfulAuthentication 실행됨: 인증 완료");
-        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+        UserDetailsImpl userDetailsImpl = (UserDetailsImpl) authResult.getPrincipal();
 
         //RSA 방식은 아니고 Hash 암호방식
         String jwtToken = JWT.create()
                 .withSubject("cos 토큰")
-                .withExpiresAt(new Date(System.currentTimeMillis() + (60000 * 10))) // 만료시간
-                .withClaim("id", principalDetails.getUser().getId())
-                .withClaim("username", principalDetails.getUser().getUsername())
-                .sign(Algorithm.HMAC512("cos"));
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME)) // 만료시간
+                .withClaim("id", userDetailsImpl.getUser().getId())
+                .withClaim("username", userDetailsImpl.getUser().getUsername())
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        response.addHeader("Authorization", "Bearer " + jwtToken);
+        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
     }
 }
